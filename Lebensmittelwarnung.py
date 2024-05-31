@@ -20,7 +20,7 @@ def get_html_content() -> BeautifulSoup:
     return BeautifulSoup(requests_website.text, "html.parser")
 
 
-def get_recent_content(html_content) -> list[list]:
+def get_recent_content(html_content: BeautifulSoup) -> list[list[str]]:
     """
     This function takes the BeautifulSoup Object created by
     get_html_content and searches for all required information.
@@ -48,7 +48,7 @@ def get_recent_content(html_content) -> list[list]:
     return recent_content
 
 
-def check_for_new_entries(recent_content) -> int:
+def check_for_new_entries(recent_content: list[list[str]]) -> int:
     """
     This function takes the recent_content list and checks if there there are
     new entries created on the day before.
@@ -63,7 +63,7 @@ def check_for_new_entries(recent_content) -> int:
 
 
 # This function will send the new values to our Stream
-def send_new_values(n_new_entries, recent_content) -> None:
+def send_new_values(n_new_entries: int, recent_content: list[list[str]]) -> None:
     if n_new_entries == 0:
         return
 
