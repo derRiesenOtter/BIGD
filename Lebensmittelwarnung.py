@@ -1,9 +1,11 @@
+import datetime
 import re
-import requests 
-from bs4 import BeautifulSoup 
 import time
 import schedule
-import datetime
+
+import requests 
+from bs4 import BeautifulSoup 
+import pykafka
 
 def get_html_content() -> BeautifulSoup:
     """ 
