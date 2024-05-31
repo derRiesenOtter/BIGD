@@ -5,12 +5,22 @@ import time
 import schedule
 import datetime
 
-def get_html_content():
+def get_html_content() -> BeautifulSoup:
+    """ 
+    This function requests the html content of our website and returns
+    it as a BeautifulSoup object.
+    """
     web_address = "https://www.lebensmittelwarnung.de/bvl-lmw-de/liste/alle/deutschlandweit/10/0"
-    request_website = requests.get(web_address)
-    return BeautifulSoup(request_website.text, "html.parser")
+    requests_website = requests.get(web_address)
+    return BeautifulSoup(requests_website.text, "html.parser")
 
-def get_recent_content(html_content):
+def get_recent_content(html_content) -> list[list]:
+    """
+    This function takes the BeautifulSoup Object created by 
+    get_html_content and searches for all required information.
+    It returns a list of lists containing the information of each
+    warning.
+    """
     types = html_content.find_all("span", id=re.compile(r"e4pn"))
     dates = html_content.find_all("span", id=re.compile(r"ecqn"))
     products = html_content.find_all("span", id=re.compile(r"egqn"))
@@ -22,9 +32,12 @@ def get_recent_content(html_content):
         recent_content.append([types[i].text, dates[i].text, products[i].text, company[i].text, cause[i].text, fed_states[i].text])
     return recent_content
 
-# This function is supposed to take recent_content as input and check if there are new entries from the last day
-# It will return the number of new values
-def check_for_new_entries(recent_content):
+def check_for_new_entries(recent_content) -> int:
+    """ 
+    This function takes the recent_content list and checks if there there are 
+    new entries created on the day before. 
+    It returns the number of new entries.
+    """
     yesterday = datetime.date.today() - datetime.timedelta(1) 
     n_new_entries = 0
     for i in range(10):
