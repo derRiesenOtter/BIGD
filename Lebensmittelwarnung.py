@@ -1,24 +1,28 @@
 import datetime
 import re
 import time
-import schedule
 
-import requests 
-from bs4 import BeautifulSoup 
 import pykafka
+import requests
+import schedule
+from bs4 import BeautifulSoup
+
 
 def get_html_content() -> BeautifulSoup:
-    """ 
+    """
     This function requests the html content of our website and returns
     it as a BeautifulSoup object.
     """
-    web_address = "https://www.lebensmittelwarnung.de/bvl-lmw-de/liste/alle/deutschlandweit/10/0"
+    web_address = (
+        "https://www.lebensmittelwarnung.de/bvl-lmw-de/liste/alle/deutschlandweit/10/0"
+    )
     requests_website = requests.get(web_address)
     return BeautifulSoup(requests_website.text, "html.parser")
 
+
 def get_recent_content(html_content) -> list[list]:
     """
-    This function takes the BeautifulSoup Object created by 
+    This function takes the BeautifulSoup Object created by
     get_html_content and searches for all required information.
     It returns a list of lists containing the information of each
     warning.
@@ -30,33 +34,46 @@ def get_recent_content(html_content) -> list[list]:
     cause = html_content.find_all("span", id=re.compile(r"eyqn"))
     fed_states = html_content.find_all("div", id=re.compile(r"e3qn"))
     recent_content = []
-    for i in range (10): 
-        recent_content.append([types[i].text, dates[i].text, products[i].text, company[i].text, cause[i].text, fed_states[i].text])
+    for i in range(10):
+        recent_content.append(
+            [
+                types[i].text,
+                dates[i].text,
+                products[i].text,
+                company[i].text,
+                cause[i].text,
+                fed_states[i].text,
+            ]
+        )
     return recent_content
 
+
 def check_for_new_entries(recent_content) -> int:
-    """ 
-    This function takes the recent_content list and checks if there there are 
-    new entries created on the day before. 
+    """
+    This function takes the recent_content list and checks if there there are
+    new entries created on the day before.
     It returns the number of new entries.
     """
-    yesterday = datetime.date.today() - datetime.timedelta(1) 
+    yesterday = datetime.date.today() - datetime.timedelta(1)
     n_new_entries = 0
     for i in range(10):
         if recent_content[i][1] == yesterday.strftime("%d.%m.%Y"):
             n_new_entries += 1
     return n_new_entries
 
+
 # This function will send the new values to our Stream
-def send_new_values(n_new_entries, recent_content):
+def send_new_values(n_new_entries, recent_content) -> None:
     if n_new_entries == 0:
         return
 
+
 # This function will hold all tasks this script has to do every day
-def daily_task():
+def daily_task() -> None:
     pass
 
-def main():
+
+def main() -> None:
     html_content = get_html_content()
     recent_content = get_recent_content(html_content)
     n_new_entries = check_for_new_entries(recent_content)
@@ -67,6 +84,7 @@ def main():
     # while True:
     #     schedule.run_pending()
     #     time.sleep(60)
+
 
 if __name__ == "__main__":
     main()
