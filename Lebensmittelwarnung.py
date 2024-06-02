@@ -66,6 +66,9 @@ def check_for_new_entries(recent_content: list[list[str]]) -> int:
 def send_new_values(n_new_entries: int, recent_content: list[list[str]]) -> None:
     if n_new_entries == 0:
         return
+    # json formatted data
+    i = 0
+    data = f"{'type': {recent_content[i][0]},'date': {recent_content[i][1]},'product': {recent_content[i][2]},'company': {recent_content[i][3]},'cause': {recent_content[i][4]},'fed_state': {recent_content[i][5]}}"
 
 
 # This function will hold all tasks this script has to do every day
