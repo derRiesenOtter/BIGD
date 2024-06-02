@@ -1,8 +1,8 @@
 from pykafka import KafkaClient
 
-client = KafkaClient(hosts="127.0.0.1:9092")
+client = KafkaClient(hosts="127.0.0.1:29092,127.0.0.1:29093,127.0.0.1:29094")
 
-topic = client.topics["warnings"]
+topic = client.topics["test"]
 
 with topic.get_sync_producer() as producer:
     for i in range(4):
