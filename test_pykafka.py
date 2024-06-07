@@ -1,6 +1,6 @@
 from pykafka import KafkaClient
 
-client = KafkaClient(hosts="127.0.0.1:29092,127.0.0.1:29093,127.0.0.1:29094")
+client = KafkaClient(hosts="127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094")
 
 topic = client.topics["test"]
 
