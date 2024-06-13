@@ -58,11 +58,11 @@ def get_recent_content(html_content: BeautifulSoup) -> list[list[str]]:
             [
                 types[i].text,
                 dates[i].text,
-                products[i].text,
-                company[i].text,
-                cause[i].text,
-                cause_category[i]
-                fed_states[i].text,
+                products[i].text.replace("\n"," ").replace("\r"," ").replace("  ", " "),
+                company[i].text.replace("Hersteller:\n", "").split("\n")[0].replace("Hersteller:", "").split(",")[0].strip(),
+                cause[i].text.replace("\n"," ").replace("\r"," ").replace("  ", " "),
+                cause_category[i],
+                fed_states[i].text.replace("\nbetroffene Länder (alphabetisch):\n\n", "")
             ]
         )
     return recent_content
