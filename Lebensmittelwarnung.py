@@ -34,8 +34,9 @@ def get_recent_content(html_content: BeautifulSoup) -> list[list[str]]:
     cause = html_content.find_all("span", id=re.compile(r"eyqn"))
     fed_states = html_content.find_all("div", id=re.compile(r"e3qn"))
 
-    regex_microorganism = re.compile("(.Listeri.*)|(Salmonell.*)|(Patulin.*)|(.*(T|t)oxin.*)|(Pseudomon.*)|(Schimmel.*)|(Escherichia.*)|((M|m)ikro.*)|(Ba(c|z)ill.*)|(Hefe.*)")
-    regex_allergen = re.compile("(.*(A|a)llerg.*)|(.*nuss)|(Senf.*)|(Milch.*)")
+    regex_microorganism = re.compile("(.Listeri.*)|(Salmonell.*)|(Patulin.*)|(.*(T|t)oxin.*)|"
+                                     "(Pseudomon.*)|(Schimmel.*)|(Escherichia.*)|((M|m)ikro.*)|(Ba(c|z)ill.*)|(Hefe.*)")
+    regex_allergen = re.compile("(.*(A|a)llerg.*)|(.*nuss)|(Senf.*)|(Milch.*)|(Sesam.*)")
     regex_foreign_body = re.compile("(.*(F|f)remd.*)|(Glas.*)|(Metall.*)|(Kunststoff.*)|(Stein.*)")
     regex_limit = re.compile("(.*(W|w)ert.*)|(.*(G|g)ehalt.*)|((R|r)ückst.*)|(.*(M|m)enge.*)|(Arznei.*)|(Nachweis.*)|((G|g)esund.*)|((G|g)esetz.*)|(krebs.*)|(Befund.*)|((G|g)ef(a|ä)hr.*)|(zugelassen.*)")
     
