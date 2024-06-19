@@ -1,10 +1,7 @@
-import datetime
-import re
 import time
 
 import mysql.connector
 import requests
-import schedule
 from bs4 import BeautifulSoup
 
 
@@ -190,7 +187,7 @@ def send_article(
         database="Lebensmittelwarnungen",
     )
     mycursor = mydb.cursor()
-    sql = "INSERT INTO Warnungen (product_type, product_name, manufacturer, category, bundeslaender, description, consequence, reseller, article) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    sql = "INSERT INTO WARNUNGEN (product_type, product_name, manufacturer, category, bundeslaender, description, consequence, reseller, article) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
     val = (
         product_type,
         product_name,
