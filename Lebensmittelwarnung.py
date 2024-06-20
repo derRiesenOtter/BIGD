@@ -1,3 +1,4 @@
+import re
 import time
 
 import mysql.connector
@@ -33,7 +34,7 @@ def get_product_type(article_content):
         return article_content.find(
             "span", class_="lmw-producttype__label"
         ).text.strip()
-    return "NA"
+    return None
 
 
 def get_product_name(article_content):
@@ -41,7 +42,7 @@ def get_product_name(article_content):
         return article_content.find(
             "dd", class_="lmw-description-list__description"
         ).text.strip()
-    return "NA"
+    return None
 
 
 def get_manufacturer(article_content):
@@ -50,7 +51,7 @@ def get_manufacturer(article_content):
         class_="lmw-description-list__term",
         string="Hersteller / Inverkehrbringer:",
     ):
-        return (
+        manufacturer_unfiltered = (
             article_content.find(
                 "dt",
                 class_="lmw-description-list__term",
@@ -59,7 +60,14 @@ def get_manufacturer(article_content):
             .find_next()
             .text.strip()
         )
-    return "NA"
+        filter_pattern = re.compile(
+            r"^(?:Firma|Hersteller):?\s*(.*?)(,|\n|$)", re.IGNORECASE
+        )
+        match = filter_pattern.search(manufacturer_unfiltered)
+        if match:
+            return match.group(1).strip()
+        return re.split(r",|\n", manufacturer_unfiltered)[0].strip()
+    return None
 
 
 def get_category(article_content):
@@ -69,7 +77,7 @@ def get_category(article_content):
         return article_content.find(
             "span", class_="lmw-badge lmw-badge--dark lmw-badge--large"
         ).text.strip()
-    return "NA"
+    return None
 
 
 def get_bundeslaender(article_content):
@@ -79,7 +87,7 @@ def get_bundeslaender(article_content):
         for bula in bulae:
             bundeslaender.append(bula.text.strip())
         return ", ".join(bundeslaender)
-    return "NA"
+    return None
 
 
 def get_description(article_content):
@@ -95,7 +103,7 @@ def get_description(article_content):
             .find_next()
             .text.strip()
         )
-    return "NA"
+    return None
 
 
 def get_consequence(article_content):
@@ -109,21 +117,27 @@ def get_consequence(article_content):
             .find_next()
             .text.strip()
         )
-    return "NA"
+    return None
 
 
 def get_reseller(article_content):
     if article_content.find(
         "dt", class_="lmw-description-list__term", string="Vertrieb über:"
     ):
-        return (
+        reseller_unfiltered = (
             article_content.find(
                 "dt", class_="lmw-description-list__term", string="Vertrieb über:"
             )
             .find_next()
             .text.strip()
         )
-    return "NA"
+        filter_pattern = r"\b(?:REWE|Aldi|Lidl|Edeka|Netto|Penny|Kaufland|dm|Rossmann|Müller|Real|Globus)\b"
+        reseller = re.findall(filter_pattern, reseller_unfiltered, re.IGNORECASE)
+        reseller_without_dulicates = list(set(reseller))
+        if len(reseller_without_dulicates) > 0:
+            return ", ".join(reseller_without_dulicates)
+        return "Sonstige"
+    return None
 
 
 def get_article_content(article):
@@ -182,29 +196,29 @@ def send_article(
         article,
         sep="\n",
     )
-    mydb = mysql.connector.connect(
-        host="localhost",
-        port="3306",
-        user="root",
-        password="debezium",
-        database="Lebensmittelwarnungen",
-    )
-    mycursor = mydb.cursor()
-    sql = "INSERT INTO WARNUNGEN (product_type, product_name, manufacturer, category, bundeslaender, description, consequence, reseller, article) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    val = (
-        product_type,
-        product_name,
-        manufacturer,
-        category,
-        bundeslaender,
-        description,
-        consequence,
-        reseller,
-        article,
-    )
-    mycursor.execute(sql, val)
-
-    mydb.commit()
+    # mydb = mysql.connector.connect(
+    #     host="localhost",
+    #     port="3306",
+    #     user="root",
+    #     password="debezium",
+    #     database="Lebensmittelwarnungen",
+    # )
+    # mycursor = mydb.cursor()
+    # sql = "INSERT INTO WARNUNGEN (product_type, product_name, manufacturer, category, bundeslaender, description, consequence, reseller, article) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    # val = (
+    #     product_type,
+    #     product_name,
+    #     manufacturer,
+    #     category,
+    #     bundeslaender,
+    #     description,
+    #     consequence,
+    #     reseller,
+    #     article,
+    # )
+    # mycursor.execute(sql, val)
+    #
+    # mydb.commit()
 
 
 def main() -> None:
@@ -216,70 +230,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
-# def get_recent_content(html_content: BeautifulSoup) -> list[list[str]]:
-#     """
-#     This function takes the BeautifulSoup Object created by
-#     get_html_content and searches for all required information.
-#     It returns a list of lists containing the information of each
-#     warning.
-#     """
-#     types = html_content.find_all("span", id=re.compile(r"e4pn"))
-#     dates = html_content.find_all("span", id=re.compile(r"ecqn"))
-#     products = html_content.find_all("span", id=re.compile(r"egqn"))
-#     company = html_content.find_all("span", id=re.compile(r"ejqn"))
-#     cause = html_content.find_all("span", id=re.compile(r"eyqn"))
-#     fed_states = html_content.find_all("div", id=re.compile(r"e3qn"))
-#
-#     regex_microorganism = re.compile(
-#         "(.Listeri.*)|(Salmonell.*)|(Patulin.*)|(.*(T|t)oxin.*)|"
-#         "(Pseudomon.*)|(Schimmel.*)|(Escherichia.*)|((M|m)ikro.*)|(Ba(c|z)ill.*)|(Hefe.*)"
-#     )
-#     regex_allergen = re.compile(
-#         "(.*(A|a)llerg.*)|(.*nuss)|(Senf.*)|(Milch.*)|(Sesam.*)"
-#     )
-#     regex_foreign_body = re.compile(
-#         "(.*(F|f)remd.*)|(Glas.*)|(Metall.*)|(Kunststoff.*)|(Stein.*)"
-#     )
-#     regex_limit = re.compile(
-#         "(.*(W|w)ert.*)|(.*(G|g)ehalt.*)|((R|r)ückst.*)|(.*(M|m)enge.*)|(Arznei.*)|(Nachweis.*)|((G|g)esund.*)|((G|g)esetz.*)|(krebs.*)|(Befund.*)|((G|g)ef(a|ä)hr.*)|(zugelassen.*)"
-#     )
-#
-#     cause_category = []
-#     for i in cause:
-#         if bool(regex_microorganism.search(i.text)):
-#             cause_category.append("Mikroorganismen und Toxine")
-#         elif bool(regex_allergen.search(i.text)):
-#             cause_category.append("Allergene")
-#         elif bool(regex_foreign_body.search(i.text)):
-#             cause_category.append("Fremdkörper/-stoffe")
-#         elif bool(regex_limit.search(i.text)):
-#             cause_category.append("Grenzwertüberschreitung und Gesundheitsgefährdung")
-#         else:
-#             cause_category.append("Sonstiges")
-#
-#     recent_content = []
-#     for i in range(10):
-#         recent_content.append(
-#             [
-#                 types[i].text,
-#                 dates[i].text,
-#                 products[i]
-#                 .text.replace("\n", " ")
-#                 .replace("\r", " ")
-#                 .replace("  ", " "),
-#                 company[i]
-#                 .text.replace("Hersteller:\n", "")
-#                 .split("\n")[0]
-#                 .replace("Hersteller:", "")
-#                 .split(",")[0]
-#                 .strip(),
-#                 cause[i].text.replace("\n", " ").replace("\r", " ").replace("  ", " "),
-#                 cause_category[i],
-#                 fed_states[i].text.replace(
-#                     "\nbetroffene Länder (alphabetisch):\n\n", ""
-#                 ),
-#             ]
-#         )
-#     return recent_content
