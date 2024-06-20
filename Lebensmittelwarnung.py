@@ -196,29 +196,29 @@ def send_article(
         article,
         sep="\n",
     )
-    # mydb = mysql.connector.connect(
-    #     host="localhost",
-    #     port="3306",
-    #     user="root",
-    #     password="debezium",
-    #     database="Lebensmittelwarnungen",
-    # )
-    # mycursor = mydb.cursor()
-    # sql = "INSERT INTO WARNUNGEN (product_type, product_name, manufacturer, category, bundeslaender, description, consequence, reseller, article) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    # val = (
-    #     product_type,
-    #     product_name,
-    #     manufacturer,
-    #     category,
-    #     bundeslaender,
-    #     description,
-    #     consequence,
-    #     reseller,
-    #     article,
-    # )
-    # mycursor.execute(sql, val)
-    #
-    # mydb.commit()
+    mydb = mysql.connector.connect(
+        host="localhost",
+        port="3306",
+        user="root",
+        password="debezium",
+        database="Lebensmittelwarnungen",
+    )
+    mycursor = mydb.cursor()
+    sql = "INSERT INTO WARNUNGEN (product_type, product_name, manufacturer, category, bundeslaender, description, consequence, reseller, article) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    val = (
+        product_type,
+        product_name,
+        manufacturer,
+        category,
+        bundeslaender,
+        description,
+        consequence,
+        reseller,
+        article,
+    )
+    mycursor.execute(sql, val)
+
+    mydb.commit()
 
 
 def main() -> None:
