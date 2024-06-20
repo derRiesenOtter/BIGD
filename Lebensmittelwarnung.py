@@ -11,15 +11,18 @@ def get_new_articles(most_recent_article) -> BeautifulSoup:
     main_page = BeautifulSoup(requests_website.text, "html.parser")
     article_list = []
     most_recent_article_refreshed = False
+    helper_most_recent_article = ""
     for link in main_page.find_all("a"):
         href = link.get("href")
         if href and "Meldungen" in href:
             if href == most_recent_article:
                 break
             if not most_recent_article_refreshed:
-                most_recent_article = href
+                helper_most_recent_article = href
                 most_recent_article_refreshed = True
             article_list.append(href)
+    if helper_most_recent_article != "":
+        most_recent_article = helper_most_recent_article
     for article in article_list:
         get_article_content(article)
     return most_recent_article
@@ -208,7 +211,7 @@ def main() -> None:
     most_recent_article = ""
     while True:
         most_recent_article = get_new_articles(most_recent_article)
-        time.sleep(10)
+        time.sleep(3600)
 
 
 if __name__ == "__main__":
