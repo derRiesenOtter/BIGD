@@ -1,5 +1,6 @@
 import re
 import time
+from pathlib import Path
 
 import mysql.connector
 import requests
@@ -7,7 +8,7 @@ from bs4 import BeautifulSoup
 
 
 def get_new_articles(most_recent_article) -> BeautifulSoup:
-    web_address = "https://www.lebensmittelwarnung.de/DE/Home/home_node.html"
+    web_address = "https://www.lebensmittelwarnung.de/SiteGlobals/Forms/Suche/Expertensuche/Expertensuche_Formular.html?templateQueryString=&lastChangeAfter=&lastChangeBefore=&resultsPerPage=100&resultsPerPage.GROUP=1"
     requests_website = requests.get(web_address)
     main_page = BeautifulSoup(requests_website.text, "html.parser")
     article_list = []
@@ -25,7 +26,7 @@ def get_new_articles(most_recent_article) -> BeautifulSoup:
     if helper_most_recent_article != "":
         most_recent_article = helper_most_recent_article
     for article in article_list:
-        get_article_content(article)
+        get_article_content("https://www.lebensmittelwarnung.de/" + article)
     return most_recent_article
 
 
@@ -196,35 +197,43 @@ def send_article(
         article,
         sep="\n",
     )
-    mydb = mysql.connector.connect(
-        host="localhost",
-        port="3306",
-        user="root",
-        password="debezium",
-        database="Lebensmittelwarnungen",
-    )
-    mycursor = mydb.cursor()
-    sql = "INSERT INTO WARNUNGEN (product_type, product_name, manufacturer, category, bundeslaender, description, consequence, reseller, article) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    val = (
-        product_type,
-        product_name,
-        manufacturer,
-        category,
-        bundeslaender,
-        description,
-        consequence,
-        reseller,
-        article,
-    )
-    mycursor.execute(sql, val)
-
-    mydb.commit()
+    # mydb = mysql.connector.connect(
+    #     host="localhost",
+    #     port="3306",
+    #     user="root",
+    #     password="debezium",
+    #     database="Lebensmittelwarnungen",
+    # )
+    # mycursor = mydb.cursor()
+    # sql = "INSERT INTO WARNUNGEN (product_type, product_name, manufacturer, category, bundeslaender, description, consequence, reseller, article) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    # val = (
+    #     product_type,
+    #     product_name,
+    #     manufacturer,
+    #     category,
+    #     bundeslaender,
+    #     description,
+    #     consequence,
+    #     reseller,
+    #     article,
+    # )
+    # mycursor.execute(sql, val)
+    #
+    # mydb.commit()
 
 
 def main() -> None:
-    most_recent_article = ""
+    most_recent_article_file = "most_recent_article.txt"
+    if not Path(most_recent_article_file).is_file():
+        with open(most_recent_article_file, "w") as file:
+            file.write("")
     while True:
-        most_recent_article = get_new_articles(most_recent_article)
+        with open(most_recent_article_file, "r") as file:
+            most_recent_article = str(file.read()).strip()
+        new_most_recent_article = get_new_articles(most_recent_article)
+        with open(most_recent_article_file, "w") as file:
+            file.write(str(new_most_recent_article))
+
         time.sleep(3600)
 
 
