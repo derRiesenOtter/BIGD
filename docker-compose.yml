@@ -74,6 +74,8 @@ services:
         /etc/confluent/docker/run &
         #
         sleep infinity
+    volumes:
+      - connect-config:/etc/kafka/connect
 
   ksqldb:
     image: confluentinc/ksqldb-server:0.21.0
@@ -211,4 +213,6 @@ volumes:
   mysql-data:
     driver: local
   elasticsearch-data:
+    driver: local
+  connect-config:
     driver: local
