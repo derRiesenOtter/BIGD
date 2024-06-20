@@ -13,14 +13,12 @@ und weitergegeben werden.
 ```
 git clone https://github.com/derRiesenOtter/BIGD.git
 cd BIGD
-
 ```
 
 3.
 
 ```
 sudo docker compose up -d
-
 ```
 
 4.
@@ -34,7 +32,6 @@ bash -c ' \
    done
    echo -e $(date) "\n\n--------------\n\o/ Kafka Connect is ready! Listener HTTP state: " $(curl -s -o /dev/null -w %{http_code} http://localhost:8083/connectors) "\n--------------\n"
    '
-
 ```
 
 5.
@@ -47,7 +44,6 @@ curl -s localhost:8083/connector-plugins|jq '.[].class'|egrep 'MySqlConnector|El
 
 ```
 sudo docker exec -it mysql bash -c 'mysql -u root -p$MYSQL_ROOT_PASSWORD'
-
 ```
 
 7.
@@ -82,7 +78,6 @@ reseller VARCHAR(1000),
 article VARCHAR(300),
 CREATE_TS TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 ```
 
 9.
@@ -115,7 +110,6 @@ curl -i -X PUT -H "Content-Type:application/json" \
     "transforms.addTopicPrefix.regex":"(.*)",
     "transforms.addTopicPrefix.replacement":"mysql-debezium-$1"
     }'
-
 ```
 
 11.
@@ -124,7 +118,6 @@ curl -i -X PUT -H "Content-Type:application/json" \
 curl -s "http://localhost:8083/connectors?expand=info&expand=status" | \
      jq '. | to_entries[] | [ .value.info.type, .key, .value.status.connector.state,.value.status.tasks[].state,.value.info.config."connector.class"]|join(":|:")' | \
      column -s : -t| sed 's/\"//g'| sort
-
 ```
 
 12.
@@ -140,7 +133,6 @@ curl -i -X PUT -H "Content-Type:application/json" \
     "key.ignore": "true",
     "schema.ignore": "true"
     }'
-
 ```
 
 13.
