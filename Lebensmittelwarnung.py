@@ -61,6 +61,9 @@ def get_manufacturer(article_content):
             .find_next()
             .text.strip()
         )
+        prefilter_pattern = re.compile(r"^Inverkehrbringer", re.IGNORECASE)
+        if prefilter_pattern.search(manufacturer_unfiltered):
+            return None
         filter_pattern = re.compile(
             r"^(?:Firma|Hersteller):?\s*(.*?)(,|\n|$)", re.IGNORECASE
         )
