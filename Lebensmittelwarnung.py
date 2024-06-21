@@ -145,6 +145,22 @@ def get_reseller(article_content):
     return None
 
 
+def get_date(article_content):
+    if article_content.find("time", class_="lmw-datetime lmw-card__datetime"):
+        date_unformatted = article_content.find(
+            "time", class_="lmw-datetime lmw-card__datetime"
+        ).text.strip()
+        date_formatted = (
+            date_unformatted[6:]
+            + "-"
+            + date_unformatted[3:5]
+            + "-"
+            + date_unformatted[0:2]
+        )
+        return date_formatted
+    return None
+
+
 def get_article_content(article):
     requests_article = requests.get(article)
     article_content = BeautifulSoup(requests_article.text, "html.parser")
@@ -156,6 +172,7 @@ def get_article_content(article):
     description = get_description(article_content)
     consequence = get_consequence(article_content)
     reseller = get_reseller(article_content)
+    date = get_date(article_content)
     send_article(
         product_type,
         product_name,
@@ -165,6 +182,7 @@ def get_article_content(article):
         description,
         consequence,
         reseller,
+        date,
         article,
     )
 
@@ -178,6 +196,7 @@ def send_article(
     description,
     consequence,
     reseller,
+    date,
     article,
 ):
     print(
@@ -197,6 +216,8 @@ def send_article(
         consequence,
         "\nVertrieb:\n",
         reseller,
+        "\nDatum:\n",
+        date,
         "\nURL:",
         article,
         sep="\n",
@@ -219,6 +240,7 @@ def send_article(
         description,
         consequence,
         reseller,
+        date,
         article,
     )
     mycursor.execute(sql, val)
