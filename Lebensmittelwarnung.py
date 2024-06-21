@@ -1,3 +1,4 @@
+import json
 import re
 import time
 from pathlib import Path
@@ -35,15 +36,18 @@ def get_product_type(article_content):
         return article_content.find(
             "span", class_="lmw-producttype__label"
         ).text.strip()
-    return None
+    return "NA"
 
 
 def get_product_name(article_content):
     if article_content.find("dd", class_="lmw-description-list__description"):
-        return article_content.find(
-            "dd", class_="lmw-description-list__description"
-        ).text.strip()
-    return None
+        return (
+            article_content.find("dd", class_="lmw-description-list__description")
+            .text.strip()
+            .replace('"', "")
+            .replace("'", "")
+        )
+    return "NA"
 
 
 def get_manufacturer(article_content):
@@ -60,10 +64,12 @@ def get_manufacturer(article_content):
             )
             .find_next()
             .text.strip()
+            .replace('"', "")
+            .replace("'", "")
         )
         prefilter_pattern = re.compile(r"^Inverkehrbringer", re.IGNORECASE)
         if prefilter_pattern.search(manufacturer_unfiltered):
-            return None
+            return "NA"
         filter_pattern = re.compile(
             r"^(?:Firma|Hersteller):?\s*(.*?)(,|\n|$)", re.IGNORECASE
         )
@@ -71,7 +77,7 @@ def get_manufacturer(article_content):
         if match:
             return match.group(1).strip()
         return re.split(r",|\n", manufacturer_unfiltered)[0].strip()
-    return None
+    return "NA"
 
 
 def get_category(article_content):
@@ -81,7 +87,7 @@ def get_category(article_content):
         return article_content.find(
             "span", class_="lmw-badge lmw-badge--dark lmw-badge--large"
         ).text.strip()
-    return None
+    return "NA"
 
 
 def get_bundeslaender(article_content):
@@ -91,8 +97,8 @@ def get_bundeslaender(article_content):
         for bula in bulae:
             bundeslaender.append(bula.text.strip())
         bundeslaender = list(set(bundeslaender))
-        return ", ".join(bundeslaender)
-    return None
+        return bundeslaender
+    return "NA"
 
 
 def get_description(article_content):
@@ -107,8 +113,10 @@ def get_description(article_content):
             )
             .find_next()
             .text.strip()
+            .replace('"', "")
+            .replace("'", "")
         )
-    return None
+    return "NA"
 
 
 def get_consequence(article_content):
@@ -121,8 +129,10 @@ def get_consequence(article_content):
             )
             .find_next()
             .text.strip()
+            .replace('"', "")
+            .replace("'", "")
         )
-    return None
+    return "NA"
 
 
 def get_reseller(article_content):
@@ -135,14 +145,16 @@ def get_reseller(article_content):
             )
             .find_next()
             .text.strip()
+            .replace('"', "")
+            .replace("'", "")
         )
         filter_pattern = r"\b(?:REWE|Aldi|Lidl|Edeka|Netto|Penny|Kaufland|dm|Rossmann|Müller|Real|Globus)\b"
         reseller = re.findall(filter_pattern, reseller_unfiltered, re.IGNORECASE)
         reseller_without_dulicates = list(set(reseller))
         if len(reseller_without_dulicates) > 0:
-            return ", ".join(reseller_without_dulicates)
+            return reseller_without_dulicates
         return "Sonstige"
-    return None
+    return "NA"
 
 
 def get_date(article_content):
@@ -158,7 +170,7 @@ def get_date(article_content):
             + date_unformatted[0:2]
         )
         return date_formatted
-    return None
+    return "NA"
 
 
 def get_article_content(article):
@@ -212,8 +224,8 @@ def send_article(
         "Datum": date,
         "URL": article,
     }
-    print(data)
-    message = str(data)
+    message = json.dumps(data, ensure_ascii=False)
+    print(message)
     conf = {"bootstrap.servers": "localhost:9092"}
     producer = Producer(conf)
     producer.produce("lebensmittelwarnungen", message)
