@@ -2,9 +2,9 @@ import re
 import time
 from pathlib import Path
 
-import mysql.connector
 import requests
 from bs4 import BeautifulSoup
+from confluent_kafka import Producer
 
 
 def get_new_articles(most_recent_article) -> BeautifulSoup:
@@ -199,53 +199,25 @@ def send_article(
     date,
     article,
 ):
-    print(
-        "\nProdukttyp:\n",
-        product_type,
-        "\nProduktname:\n",
-        product_name,
-        "\nHersteller:\n",
-        manufacturer,
-        "\nKategorie:\n",
-        category,
-        "\nBundeslaender:\n",
-        bundeslaender,
-        "\nBeschreibung:\n",
-        description,
-        "\nFolgen:\n",
-        consequence,
-        "\nVertrieb:\n",
-        reseller,
-        "\nDatum:\n",
-        date,
-        "\nURL:",
-        article,
-        sep="\n",
-    )
-    mydb = mysql.connector.connect(
-        host="localhost",
-        port="3306",
-        user="root",
-        password="debezium",
-        database="Lebensmittelwarnungen",
-    )
-    mycursor = mydb.cursor()
-    sql = "INSERT INTO WARNUNGEN (product_type, product_name, manufacturer, category, bundeslaender, description, consequence, reseller, article) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    val = (
-        product_type,
-        product_name,
-        manufacturer,
-        category,
-        bundeslaender,
-        description,
-        consequence,
-        reseller,
-        date,
-        article,
-    )
-    mycursor.execute(sql, val)
 
-    mydb.commit()
+    data = {
+        "Produkttyp": product_type,
+        "Produktname": product_name,
+        "Hersteller": manufacturer,
+        "Kategorie": category,
+        "Bundeslaender": bundeslaender,
+        "Beschreibung": description,
+        "Folgen": consequence,
+        "Vertrieb": reseller,
+        "Datum": date,
+        "URL": article,
+    }
+    print(data)
+    message = str(data)
+    conf = {"bootstrap.servers": "localhost:9092"}
+    producer = Producer(conf)
+    producer.produce("lebensmittelwarnungen", message)
+    producer.flush()
 
 
 def main() -> None:
