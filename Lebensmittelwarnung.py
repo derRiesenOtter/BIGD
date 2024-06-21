@@ -90,6 +90,7 @@ def get_bundeslaender(article_content):
         bulae = article_content.find_all("li", class_="lmw-list__item")
         for bula in bulae:
             bundeslaender.append(bula.text.strip())
+        bundeslaender = list(set(bundeslaender))
         return ", ".join(bundeslaender)
     return None
 
