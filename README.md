@@ -1,22 +1,35 @@
 # BIGD Projektarbeit: Lebensmittelwarnung
 
 Dieses Projekt soll die Daten der Website [Lebensmittelwarnung.de](Lebensmittelwarnung.de)
-mittels eines Python Skripts täglich auf neue Einträge prüfen.
+mittels eines Python Skripts stündlich auf neue Einträge prüfen.
 Neue Einträge werden mittels diesem Skript dann direkt auch an Kafka
-übergeben. Von dort aus sollen die Daten noch veranschaulicht werden
-und weitergegeben werden.
+übergeben. Von dort aus sollen die Daten dann über ein weiteres Python
+Skript an ElasticSearch weitergegeben und dann mittels Kibana
+ausgewerten werden.
 
 ## Setup
 
-1.
+1. GitHub Repository klonen
 
-```
-git clone --single-branch --branch no_mysql https://github.com/derRiesenOtter/BIGD.git no_mysql
-cd BIGD
+```sh
+git clone https://github.com/derRiesenOtter/BIGD.git Lebensmittelwarnungen
+cd Lebensmittelwarnungen
 ```
 
-3.
+2. Über Docker compose Zookeeper, Kafka, ElasticSearch und Kibana starten
 
-```
+```sh
 sudo docker compose up -d
+```
+
+3. Python Producer Skript starten
+
+```sh
+python3 Lebensmittelwarnung.py
+```
+
+4. Python Consumer Skript starten
+
+```sh
+python3 elasticsearch-connector.py
 ```
