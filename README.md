@@ -33,3 +33,13 @@ python3 Lebensmittelwarnung.py
 ```sh
 python3 elasticsearch-connector.py
 ```
+
+## Zugriff auf Datenvirtualisierung
+
+Bei eingeschalteter VPN kann Kibana über
+
+```
+http://143.93.91.37:5601
+```
+
+aufgerufen werden.
