@@ -8,7 +8,16 @@ from bs4 import BeautifulSoup
 from confluent_kafka import Producer
 
 
-def get_new_articles(most_recent_article) -> BeautifulSoup:
+def get_new_articles(most_recent_article):
+    """
+    Fetches new articles from the website and updates the most recent article reference.
+
+    Args:
+        most_recent_article (str): URL of the most recent article processed.
+
+    Returns:
+        str: URL of the new most recent article.
+    """
     web_address = "https://www.lebensmittelwarnung.de/SiteGlobals/Forms/Suche/Expertensuche/Expertensuche_Formular.html?templateQueryString=&lastChangeAfter=&lastChangeBefore=&resultsPerPage=100&resultsPerPage.GROUP=1"
     requests_website = requests.get(web_address)
     main_page = BeautifulSoup(requests_website.text, "html.parser")
@@ -32,6 +41,15 @@ def get_new_articles(most_recent_article) -> BeautifulSoup:
 
 
 def get_product_type(article_content):
+    """
+    Extracts the product type from the article content.
+
+    Args:
+        article_content (BeautifulSoup): Parsed HTML content of the article.
+
+    Returns:
+        str: Product type if found, otherwise 'NA'.
+    """
     if article_content.find("span", class_="lmw-producttype__label"):
         return article_content.find(
             "span", class_="lmw-producttype__label"
@@ -40,6 +58,15 @@ def get_product_type(article_content):
 
 
 def get_product_name(article_content):
+    """
+    Extracts the product name from the article content.
+
+    Args:
+        article_content (BeautifulSoup): Parsed HTML content of the article.
+
+    Returns:
+        str: Product name if found, otherwise 'NA'.
+    """
     if article_content.find("dd", class_="lmw-description-list__description"):
         return (
             article_content.find("dd", class_="lmw-description-list__description")
@@ -51,6 +78,15 @@ def get_product_name(article_content):
 
 
 def get_manufacturer(article_content):
+    """
+    Extracts the manufacturer from the article content.
+
+    Args:
+        article_content (BeautifulSoup): Parsed HTML content of the article.
+
+    Returns:
+        str: Manufacturer if found, otherwise 'NA'.
+    """
     if article_content.find(
         "dt",
         class_="lmw-description-list__term",
@@ -81,6 +117,15 @@ def get_manufacturer(article_content):
 
 
 def get_category(article_content):
+    """
+    Extracts the category from the article content.
+
+    Args:
+        article_content (BeautifulSoup): Parsed HTML content of the article.
+
+    Returns:
+        str: Category if found, otherwise 'NA'.
+    """
     if article_content.find(
         "span", class_="lmw-badge lmw-badge--dark lmw-badge--large"
     ):
@@ -91,6 +136,15 @@ def get_category(article_content):
 
 
 def get_bundeslaender(article_content):
+    """
+    Extracts the Bundesländer (states) from the article content.
+
+    Args:
+        article_content (BeautifulSoup): Parsed HTML content of the article.
+
+    Returns:
+        list: List of Bundesländer if found, otherwise 'NA'.
+    """
     if article_content.find_all("li", class_="lmw-list__item"):
         bundeslaender = []
         bulae = article_content.find_all("li", class_="lmw-list__item")
@@ -102,6 +156,15 @@ def get_bundeslaender(article_content):
 
 
 def get_description(article_content):
+    """
+    Extracts the description from the article content.
+
+    Args:
+        article_content (BeautifulSoup): Parsed HTML content of the article.
+
+    Returns:
+        str: Description if found, otherwise 'NA'.
+    """
     if article_content.find(
         "dt", class_="lmw-description-list__term", string="Weitere Informationen:"
     ):
@@ -120,6 +183,15 @@ def get_description(article_content):
 
 
 def get_consequence(article_content):
+    """
+    Extracts the possible consequences from the article content.
+
+    Args:
+        article_content (BeautifulSoup): Parsed HTML content of the article.
+
+    Returns:
+        str: Consequences if found, otherwise 'NA'.
+    """
     if article_content.find(
         "dt", class_="lmw-description-list__term", string="Mögliche Folgen:"
     ):
@@ -136,6 +208,15 @@ def get_consequence(article_content):
 
 
 def get_reseller(article_content):
+    """
+    Extracts the resellers from the article content.
+
+    Args:
+        article_content (BeautifulSoup): Parsed HTML content of the article.
+
+    Returns:
+        list: List of resellers if found, otherwise 'Sonstige' or 'NA'.
+    """
     if article_content.find(
         "dt", class_="lmw-description-list__term", string="Vertrieb über:"
     ):
@@ -158,6 +239,15 @@ def get_reseller(article_content):
 
 
 def get_date(article_content):
+    """
+    Extracts the date from the article content.
+
+    Args:
+        article_content (BeautifulSoup): Parsed HTML content of the article.
+
+    Returns:
+        str: Date in YYYY-MM-DD format if found, otherwise 'NA'.
+    """
     if article_content.find("time", class_="lmw-datetime lmw-card__datetime"):
         date_unformatted = article_content.find(
             "time", class_="lmw-datetime lmw-card__datetime"
@@ -174,6 +264,12 @@ def get_date(article_content):
 
 
 def get_article_content(article):
+    """
+    Processes an article to extract various details and send them for further processing.
+
+    Args:
+        article (str): URL of the article to be processed.
+    """
     requests_article = requests.get(article)
     article_content = BeautifulSoup(requests_article.text, "html.parser")
     product_type = get_product_type(article_content)
@@ -211,6 +307,21 @@ def send_article(
     date,
     article,
 ):
+    """
+    Sends the article details to a Kafka topic.
+
+    Args:
+        product_type (str): Type of the product.
+        product_name (str): Name of the product.
+        manufacturer (str): Manufacturer of the product.
+        category (str): Category of the product.
+        bundeslaender (list): List of Bundesländer (states).
+        description (str): Description of the product.
+        consequence (str): Possible consequences.
+        reseller (list): List of resellers.
+        date (str): Date of the article.
+        article (str): URL of the article.
+    """
 
     data = {
         "Produkttyp": product_type,
@@ -232,7 +343,11 @@ def send_article(
     producer.flush()
 
 
-def main() -> None:
+def main():
+    """
+    Main function to execute the script. It fetches new articles periodically
+    and processes them.
+    """
     most_recent_article_file = "most_recent_article.txt"
     if not Path(most_recent_article_file).is_file():
         with open(most_recent_article_file, "w") as file:
