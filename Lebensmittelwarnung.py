@@ -233,8 +233,8 @@ def get_reseller(article_content):
         reseller = re.findall(filter_pattern, reseller_unfiltered, re.IGNORECASE)
         reseller_without_dulicates = list(set(reseller))
         reseller_lowercase = [reseller.lower for reseller in reseller_without_dulicates]
-        if len(reseller_without_dulicates) > 0:
-            return reseller_without_dulicates
+        if len(reseller_lowercase) > 0:
+            return reseller_lowercase
         return "Sonstige"
     return "NA"
 
