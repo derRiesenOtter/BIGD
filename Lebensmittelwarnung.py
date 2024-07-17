@@ -232,6 +232,7 @@ def get_reseller(article_content):
         filter_pattern = r"\b(?:REWE|Aldi|Lidl|Edeka|Netto|Penny|Kaufland|dm|Rossmann|Müller|Real|Globus)\b"
         reseller = re.findall(filter_pattern, reseller_unfiltered, re.IGNORECASE)
         reseller_without_dulicates = list(set(reseller))
+        reseller_lowercase = [reseller.lower for reseller in reseller_without_dulicates]
         if len(reseller_without_dulicates) > 0:
             return reseller_without_dulicates
         return "Sonstige"
