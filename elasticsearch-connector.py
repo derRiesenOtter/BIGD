@@ -1,4 +1,5 @@
 import json
+import time
 
 from confluent_kafka import Consumer
 from elasticsearch import Elasticsearch
@@ -32,6 +33,7 @@ def consume_messages():
         data = json.loads(message.value().decode("utf-8").replace("'", '"'))
         print(data)
         es.index(index="lebensmittelwarnungen", body=data)
+        time.sleep(3600)
 
 
 def main():
